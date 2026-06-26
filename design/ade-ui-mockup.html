@@ -1,0 +1,439 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ADE — Workspace (mockup)</title>
+<style>
+  :root{
+    --bg:#0a0b12; --bg2:#0e1018; --panel:rgba(20,23,34,.72); --panel2:rgba(28,32,46,.78);
+    --stroke:rgba(255,255,255,.08); --stroke2:rgba(255,255,255,.14);
+    --txt:#e7e9f3; --muted:#9aa1b8; --faint:#646b85;
+    --accent:#7c6cff; --accent2:#22d3ee; --gold:#f5c451;
+    --ok:#34d399; --warn:#f59e0b; --err:#fb7185; --work:#22d3ee;
+    --r:16px; --r2:12px;
+    font-synthesis:none;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{
+    background:
+      radial-gradient(1200px 700px at 78% -8%, rgba(124,108,255,.16), transparent 60%),
+      radial-gradient(900px 600px at 8% 110%, rgba(34,211,238,.10), transparent 60%),
+      var(--bg);
+    color:var(--txt);
+    font-family:"Inter",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial;
+    overflow:hidden;
+  }
+  /* ---------- top bar ---------- */
+  .topbar{position:fixed;inset:0 0 auto 0;height:56px;display:flex;align-items:center;gap:16px;
+    padding:0 18px;background:linear-gradient(180deg,rgba(14,16,24,.92),rgba(14,16,24,.55));
+    border-bottom:1px solid var(--stroke);backdrop-filter:blur(12px);z-index:40}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.2px}
+  .logo{width:26px;height:26px;border-radius:8px;background:conic-gradient(from 200deg,var(--accent),var(--accent2),var(--gold),var(--accent));
+    box-shadow:0 0 18px rgba(124,108,255,.5)}
+  .brand small{font-weight:600;color:var(--muted);margin-left:2px}
+  .seg{display:flex;background:rgba(255,255,255,.05);border:1px solid var(--stroke);border-radius:10px;padding:3px}
+  .seg button{all:unset;cursor:pointer;font-size:12.5px;color:var(--muted);padding:5px 12px;border-radius:7px;font-weight:600}
+  .seg button.on{background:rgba(124,108,255,.22);color:#fff;box-shadow:inset 0 0 0 1px rgba(124,108,255,.5)}
+  .grow{flex:1}
+  .pillbtn{display:flex;align-items:center;gap:7px;background:rgba(255,255,255,.05);border:1px solid var(--stroke);
+    color:var(--muted);font-size:12.5px;font-weight:600;padding:7px 12px;border-radius:9px;cursor:pointer}
+  .run{background:linear-gradient(180deg,#7c6cff,#5b49f0);color:#fff;border:none;box-shadow:0 6px 18px rgba(124,108,255,.45)}
+  .pres{display:flex}
+  .pres span{width:28px;height:28px;border-radius:50%;border:2px solid var(--bg2);margin-left:-8px;
+    display:grid;place-items:center;font-size:11px;font-weight:700;color:#0a0b12}
+  /* ---------- left rail ---------- */
+  .rail{position:fixed;top:56px;bottom:0;left:0;width:226px;padding:14px 12px;z-index:30;
+    background:linear-gradient(180deg,rgba(12,14,22,.6),rgba(12,14,22,.25));border-right:1px solid var(--stroke);backdrop-filter:blur(8px)}
+  .rail h4{margin:6px 6px 10px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint)}
+  .team-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:10px;cursor:pointer;margin-bottom:4px}
+  .team-item:hover{background:rgba(255,255,255,.05)}
+  .team-item.on{background:rgba(124,108,255,.14);box-shadow:inset 0 0 0 1px rgba(124,108,255,.32)}
+  .dot{width:9px;height:9px;border-radius:50%;flex:none}
+  .team-item b{font-size:13px;font-weight:650}
+  .team-item small{display:block;color:var(--faint);font-size:11px;font-weight:600}
+  .addbtn{margin-top:8px;width:100%;border:1px dashed var(--stroke2);background:transparent;color:var(--muted);
+    padding:9px;border-radius:10px;font-weight:650;font-size:12.5px;cursor:pointer}
+  .rail .foot{position:absolute;left:12px;right:12px;bottom:12px;font-size:11px;color:var(--faint)}
+  /* ---------- canvas ---------- */
+  .stage{position:fixed;top:56px;left:226px;right:0;bottom:0;overflow:hidden;
+    background-image:radial-gradient(rgba(255,255,255,.05) 1px,transparent 1.4px);background-size:26px 26px}
+  .world{position:absolute;inset:0}
+  svg.edges{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
+  .edge{fill:none;stroke:url(#eg);stroke-width:2;opacity:.5}
+  .edge.cross{stroke-dasharray:2 7;stroke:rgba(245,196,81,.55);opacity:.7}
+  .edge.active{stroke:url(#ega);stroke-width:2.6;opacity:1;stroke-dasharray:7 9;animation:flow 1s linear infinite;
+    filter:drop-shadow(0 0 6px rgba(34,211,238,.55))}
+  @keyframes flow{to{stroke-dashoffset:-32}}
+  /* team zone */
+  .zone{position:absolute;border-radius:22px;border:1.5px dashed rgba(255,255,255,.12);
+    background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,.012))}
+  .zone .zhead{position:absolute;top:-14px;left:18px;display:flex;align-items:center;gap:9px;
+    background:var(--panel2);border:1px solid var(--stroke);border-radius:999px;padding:5px 12px;backdrop-filter:blur(8px)}
+  .zone .zhead b{font-size:12.5px;font-weight:700}
+  .zone .zhead .cnt{font-size:11px;color:var(--faint);font-weight:600}
+  .zone .zstatus{position:absolute;top:-12px;right:16px;font-size:11px;font-weight:700;color:var(--muted);
+    background:var(--panel2);border:1px solid var(--stroke);border-radius:999px;padding:4px 10px}
+  /* agent node */
+  .node{position:absolute;width:162px;border-radius:14px;cursor:pointer;
+    background:var(--panel);border:1px solid var(--stroke2);backdrop-filter:blur(10px);
+    box-shadow:0 10px 30px rgba(0,0,0,.35);transition:transform .12s,box-shadow .12s,border-color .12s}
+  .node:hover{transform:translateY(-2px);border-color:rgba(124,108,255,.55);box-shadow:0 16px 40px rgba(0,0,0,.5)}
+  .node.sel{border-color:var(--accent);box-shadow:0 0 0 2px rgba(124,108,255,.5),0 16px 44px rgba(0,0,0,.55)}
+  .node.leader{border-color:rgba(245,196,81,.5)}
+  .node .top{display:flex;align-items:center;gap:9px;padding:10px 11px 6px}
+  .av{width:30px;height:30px;border-radius:9px;flex:none;display:grid;place-items:center;font-weight:800;font-size:13px;color:#0a0b12}
+  .node .nm{font-size:13px;font-weight:700;line-height:1.1}
+  .node .rl{font-size:10.5px;color:var(--muted);font-weight:600}
+  .crown{position:absolute;top:-9px;left:-7px;font-size:15px;filter:drop-shadow(0 2px 3px rgba(0,0,0,.5))}
+  .sdot{position:absolute;top:11px;right:11px;width:9px;height:9px;border-radius:50%}
+  .st-work{background:var(--work);box-shadow:0 0 0 0 rgba(34,211,238,.6);animation:pulse 1.4s infinite}
+  .st-idle{background:#5b6178}.st-done{background:var(--ok)}.st-err{background:var(--err);animation:pulse 1.4s infinite}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(34,211,238,.5)}70%{box-shadow:0 0 0 7px rgba(34,211,238,0)}100%{box-shadow:0 0 0 0 rgba(34,211,238,0)}}
+  .row{display:flex;align-items:center;gap:6px;padding:0 11px;flex-wrap:wrap}
+  .badge{font-size:9.5px;font-weight:700;padding:2.5px 6px;border-radius:6px;letter-spacing:.02em}
+  .m-claude{background:rgba(217,119,87,.18);color:#e8a17e;border:1px solid rgba(217,119,87,.35)}
+  .m-gpt{background:rgba(16,163,127,.16);color:#4ade80;border:1px solid rgba(16,163,127,.35)}
+  .m-gemini{background:rgba(96,165,250,.16);color:#93c5fd;border:1px solid rgba(96,165,250,.35)}
+  .m-deepseek{background:rgba(124,108,255,.18);color:#b3a8ff;border:1px solid rgba(124,108,255,.4)}
+  .chip{font-size:9.5px;font-weight:650;color:var(--muted);background:rgba(255,255,255,.05);border:1px solid var(--stroke);padding:2.5px 6px;border-radius:6px}
+  .chip.proof{color:#7ef0c0;border-color:rgba(52,211,153,.4);background:rgba(52,211,153,.1)}
+  .ctx{padding:8px 11px 11px}
+  .ctx .lab{display:flex;justify-content:space-between;font-size:9.5px;color:var(--faint);font-weight:600;margin-bottom:4px}
+  .bar{height:5px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden}
+  .bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--accent2),var(--accent))}
+  .bar i.hi{background:linear-gradient(90deg,#f59e0b,#fb7185)}
+  /* task card */
+  .task{position:absolute;width:150px;background:rgba(18,21,32,.78);border:1px solid var(--stroke);border-left:3px solid var(--accent2);
+    border-radius:10px;padding:8px 10px;backdrop-filter:blur(8px);font-size:11px;box-shadow:0 8px 22px rgba(0,0,0,.4)}
+  .task b{font-size:11.5px;font-weight:700;display:block;margin-bottom:5px}
+  .task .meta{display:flex;justify-content:space-between;color:var(--faint);font-weight:600;font-size:10px}
+  .tprog{height:4px;border-radius:99px;background:rgba(255,255,255,.08);margin-top:6px;overflow:hidden}
+  .tprog i{display:block;height:100%;background:linear-gradient(90deg,var(--accent2),var(--accent))}
+  /* zoom + minimap */
+  .zoom{position:fixed;left:240px;bottom:18px;display:flex;flex-direction:column;background:var(--panel);border:1px solid var(--stroke);
+    border-radius:10px;overflow:hidden;z-index:25;backdrop-filter:blur(8px)}
+  .zoom button{all:unset;cursor:pointer;width:34px;height:32px;text-align:center;color:var(--muted);font-size:16px;font-weight:700}
+  .zoom button:hover{background:rgba(255,255,255,.06);color:#fff}
+  .mini{position:fixed;right:18px;bottom:18px;width:190px;height:118px;border-radius:12px;border:1px solid var(--stroke);
+    background:rgba(10,12,20,.7);z-index:25;overflow:hidden;backdrop-filter:blur(8px)}
+  .mini .vp{position:absolute;border:1.5px solid rgba(124,108,255,.7);border-radius:5px;background:rgba(124,108,255,.1)}
+  .mini b{position:absolute;width:14px;height:9px;border-radius:3px}
+  /* ---------- inspector ---------- */
+  .inspect{position:fixed;top:68px;right:-380px;width:352px;bottom:18px;background:var(--panel2);border:1px solid var(--stroke2);
+    border-radius:16px;backdrop-filter:blur(16px);z-index:35;transition:right .28s cubic-bezier(.2,.7,.2,1);
+    box-shadow:-20px 0 60px rgba(0,0,0,.5);display:flex;flex-direction:column}
+  .inspect.open{right:18px}
+  .insp-head{display:flex;align-items:center;gap:11px;padding:16px 16px 12px;border-bottom:1px solid var(--stroke)}
+  .insp-head .av{width:40px;height:40px;border-radius:11px;font-size:16px}
+  .insp-head .nm{font-size:15px;font-weight:750}
+  .insp-head .rl{font-size:11.5px;color:var(--muted);font-weight:600}
+  .insp-x{margin-left:auto;cursor:pointer;color:var(--faint);font-size:18px}
+  .tabs{display:flex;gap:4px;padding:10px 14px;border-bottom:1px solid var(--stroke)}
+  .tabs button{all:unset;cursor:pointer;font-size:12px;font-weight:650;color:var(--muted);padding:6px 11px;border-radius:8px}
+  .tabs button.on{background:rgba(124,108,255,.18);color:#fff}
+  .insp-body{padding:14px 16px;overflow:auto;font-size:12.5px}
+  .field{margin-bottom:14px}
+  .field .k{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);font-weight:700;margin-bottom:6px}
+  .field .v{color:var(--txt)}
+  .sys{background:rgba(0,0,0,.28);border:1px solid var(--stroke);border-radius:10px;padding:10px;color:#c7cce0;font-size:11.5px;line-height:1.5;font-family:ui-monospace,monospace}
+  .kv{display:flex;gap:7px;flex-wrap:wrap}
+  .ctxbig .lab{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);font-weight:600;margin-bottom:5px}
+  .memrow{display:flex;align-items:center;justify-content:space-between;padding:7px 9px;border:1px solid var(--stroke);border-radius:8px;margin-bottom:6px;background:rgba(255,255,255,.025)}
+  .memrow small{color:var(--faint);font-weight:600}
+  .pin{cursor:pointer;color:var(--gold);font-size:12px}
+  /* ---------- floating chat ---------- */
+  .chat{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);width:560px;max-width:calc(100vw - 280px);
+    background:var(--panel2);border:1px solid var(--stroke2);border-radius:18px;backdrop-filter:blur(18px);
+    box-shadow:0 24px 70px rgba(0,0,0,.6);z-index:38;display:flex;flex-direction:column;overflow:hidden}
+  .chat-grip{height:7px;cursor:grab;display:grid;place-items:center;color:var(--faint)}
+  .chat-grip::after{content:"";width:38px;height:4px;border-radius:99px;background:rgba(255,255,255,.18)}
+  .chat-head{display:flex;align-items:center;gap:10px;padding:6px 12px 10px}
+  .target{position:relative}
+  .target>.cur{display:flex;align-items:center;gap:8px;cursor:pointer;background:rgba(124,108,255,.14);
+    border:1px solid rgba(124,108,255,.4);border-radius:999px;padding:6px 12px;font-size:12.5px;font-weight:700}
+  .target .who-av{width:18px;height:18px;border-radius:5px;display:grid;place-items:center;font-size:10px;font-weight:800;color:#0a0b12}
+  .menu{position:absolute;bottom:42px;left:0;width:268px;background:var(--panel2);border:1px solid var(--stroke2);border-radius:12px;
+    backdrop-filter:blur(16px);box-shadow:0 18px 50px rgba(0,0,0,.6);padding:6px;display:none;max-height:300px;overflow:auto}
+  .menu.show{display:block}
+  .menu .grp{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);font-weight:700;padding:8px 9px 4px}
+  .menu .opt{display:flex;align-items:center;gap:9px;padding:8px 9px;border-radius:9px;cursor:pointer;font-size:12.5px}
+  .menu .opt:hover{background:rgba(255,255,255,.06)}
+  .menu .opt .who-av{width:20px;height:20px;border-radius:6px}
+  .menu .opt small{color:var(--faint);font-weight:600;margin-left:auto}
+  .chat-sub{margin-left:auto;font-size:11px;color:var(--faint);font-weight:600}
+  .msgs{padding:6px 14px 4px;max-height:260px;overflow:auto;display:flex;flex-direction:column;gap:11px}
+  .msg{display:flex;gap:9px;align-items:flex-start}
+  .msg .av{width:26px;height:26px;border-radius:8px;font-size:11px}
+  .bub{background:rgba(255,255,255,.05);border:1px solid var(--stroke);border-radius:12px;padding:9px 12px;font-size:12.5px;line-height:1.5;max-width:430px}
+  .msg.me{flex-direction:row-reverse}
+  .msg.me .bub{background:linear-gradient(180deg,rgba(124,108,255,.22),rgba(124,108,255,.12));border-color:rgba(124,108,255,.4)}
+  .who{font-size:10.5px;color:var(--muted);font-weight:700;margin-bottom:3px}
+  .typing{display:inline-flex;gap:4px;align-items:center}
+  .typing i{width:6px;height:6px;border-radius:50%;background:var(--accent2);animation:bl 1s infinite}
+  .typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+  @keyframes bl{0%,60%,100%{opacity:.25}30%{opacity:1}}
+  .composer{display:flex;align-items:center;gap:9px;padding:10px 12px 13px;border-top:1px solid var(--stroke)}
+  .composer input{flex:1;background:rgba(0,0,0,.3);border:1px solid var(--stroke2);border-radius:11px;padding:11px 13px;color:var(--txt);font-size:13px;outline:none}
+  .composer input::placeholder{color:var(--faint)}
+  .send{width:38px;height:38px;border-radius:11px;border:none;cursor:pointer;background:linear-gradient(180deg,#7c6cff,#5b49f0);color:#fff;font-size:15px;box-shadow:0 6px 16px rgba(124,108,255,.45)}
+  .hintbar{position:fixed;left:240px;bottom:60px;font-size:11px;color:var(--faint);z-index:20}
+  kbd{background:rgba(255,255,255,.07);border:1px solid var(--stroke);border-bottom-width:2px;border-radius:5px;padding:1px 5px;font-size:10px}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="brand"><div class="logo"></div>ADE <small>· Acme Workspace</small></div>
+  <div class="seg">
+    <button class="on">◇ Grafo</button><button>▦ Canvas</button><button>≣ Tabela</button>
+  </div>
+  <input class="pillbtn" style="width:230px" placeholder="🔍 Buscar agente, time, tarefa…" />
+  <div class="grow"></div>
+  <div class="pres">
+    <span style="background:#7c6cff">JT</span><span style="background:#22d3ee">M</span><span style="background:#f5c451">A</span>
+  </div>
+  <div class="pillbtn">⌘ Comandos</div>
+  <button class="pillbtn run">▶ Rodar fluxo</button>
+</div>
+
+<!-- LEFT RAIL -->
+<div class="rail">
+  <h4>Times</h4>
+  <div class="team-item on" data-team="design"><span class="dot" style="background:#22d3ee"></span><div><b>Design</b><small>4 agentes · ativo</small></div></div>
+  <div class="team-item" data-team="dev"><span class="dot" style="background:#7c6cff"></span><div><b>Dev</b><small>4 agentes · rodando</small></div></div>
+  <div class="team-item" data-team="research"><span class="dot" style="background:#f5c451"></span><div><b>Research</b><small>3 agentes · ocioso</small></div></div>
+  <button class="addbtn">＋ Novo time</button>
+  <h4 style="margin-top:18px">Biblioteca</h4>
+  <div class="team-item"><span class="dot" style="background:#5b6178"></span><div><b>Skills</b><small>Caveman · RKT · +12</small></div></div>
+  <div class="team-item"><span class="dot" style="background:#34d399"></span><div><b>Tools / MCP</b><small>atomic ✓ · Figma · +9</small></div></div>
+  <div class="foot">⛓ substrato: <b style="color:#7ef0c0">atomic provado</b><br>12 agentes · 3 times · 5 tarefas</div>
+</div>
+
+<!-- STAGE / CANVAS -->
+<div class="stage">
+  <div class="world" id="world">
+    <svg class="edges" id="edges">
+      <defs>
+        <linearGradient id="eg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="rgba(124,108,255,.6)"/><stop offset="1" stop-color="rgba(34,211,238,.5)"/>
+        </linearGradient>
+        <linearGradient id="ega" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stop-color="#22d3ee"/><stop offset="1" stop-color="#7c6cff"/>
+        </linearGradient>
+      </defs>
+    </svg>
+
+    <!-- ZONES -->
+    <div class="zone" style="left:248px;top:96px;width:470px;height:330px">
+      <div class="zhead"><span class="dot" style="background:#22d3ee"></span><b>Time Design</b><span class="cnt">· líder Aria</span></div>
+      <div class="zstatus">⚡ ativo</div>
+    </div>
+    <div class="zone" style="left:812px;top:112px;width:500px;height:360px">
+      <div class="zhead"><span class="dot" style="background:#7c6cff"></span><b>Time Dev</b><span class="cnt">· líder Atlas</span></div>
+      <div class="zstatus" style="color:#22d3ee">▶ rodando fluxo</div>
+    </div>
+    <div class="zone" style="left:266px;top:500px;width:440px;height:268px">
+      <div class="zhead"><span class="dot" style="background:#f5c451"></span><b>Time Research</b><span class="cnt">· líder Sage</span></div>
+      <div class="zstatus">○ ocioso</div>
+    </div>
+
+    <!-- TASK CARDS -->
+    <div class="task" style="left:760px;top:300px">
+      <b>Landing redesign</b><div class="meta"><span>Design → Dev</span><span>62%</span></div><div class="tprog"><i style="width:62%"></i></div>
+    </div>
+    <div class="task" style="left:1140px;top:430px;border-left-color:#34d399">
+      <b>API checkout</b><div class="meta"><span>Forge · atomic ✓</span><span>done</span></div><div class="tprog"><i style="width:100%;background:#34d399"></i></div>
+    </div>
+
+    <!-- NODES injected by JS -->
+  </div>
+
+  <div class="hintbar">Clique num agente para administrar · arraste o chat · <kbd>⌘K</kbd> comandos</div>
+</div>
+
+<!-- ZOOM + MINIMAP -->
+<div class="zoom"><button>＋</button><button>－</button><button>⤢</button></div>
+<div class="mini" id="mini"><div class="vp" style="left:8px;top:8px;width:120px;height:80px"></div></div>
+
+<!-- INSPECTOR -->
+<div class="inspect" id="inspect">
+  <div class="insp-head">
+    <div class="av" id="ih-av">A</div>
+    <div><div class="nm" id="ih-nm">—</div><div class="rl" id="ih-rl">—</div></div>
+    <div class="insp-x" onclick="closeInsp()">✕</div>
+  </div>
+  <div class="tabs"><button class="on">Config</button><button>Contexto</button><button>Trace</button></div>
+  <div class="insp-body" id="ih-body"></div>
+</div>
+
+<!-- FLOATING CHAT -->
+<div class="chat" id="chat">
+  <div class="chat-grip" id="grip"></div>
+  <div class="chat-head">
+    <div class="target">
+      <div class="cur" id="t-cur" onclick="toggleMenu()">
+        <span class="who-av" id="t-av" style="background:#5b6178">🜂</span>
+        <span id="t-name">Sistema (ADE)</span> <span style="color:var(--faint)">▾</span>
+      </div>
+      <div class="menu" id="t-menu"></div>
+    </div>
+    <div class="chat-sub" id="t-sub">orquestrador · vê todos os times</div>
+  </div>
+  <div class="msgs" id="msgs">
+    <div class="msg"><div class="av" style="background:#5b6178;display:grid;place-items:center">🜂</div>
+      <div><div class="who">Sistema</div><div class="bub">Workspace pronto. 3 times, 12 agentes. O Time Dev está rodando o fluxo <b>API checkout</b> — Forge está editando com prova (atomic). Fale comigo, com um líder, ou direto com qualquer agente.</div></div></div>
+    <div class="msg me"><div class="av" style="background:#7c6cff;display:grid;place-items:center;color:#0a0b12">JT</div>
+      <div><div class="who" style="text-align:right">Você</div><div class="bub">Aria, deixa a paleta mais quente e manda pro Pix aplicar no hero.</div></div></div>
+    <div class="msg"><div class="av" style="background:linear-gradient(135deg,#f5c451,#fb7185);display:grid;place-items:center;color:#0a0b12">A</div>
+      <div><div class="who">Aria · líder Design <span class="badge m-claude" style="margin-left:4px">Claude Opus</span></div>
+      <div class="bub"><span class="typing"><i></i><i></i><i></i></span> ajustando tokens de cor e abrindo handoff → Pix…</div></div></div>
+  </div>
+  <div class="composer">
+    <input id="inp" placeholder="Mensagem para Sistema (ADE)…" />
+    <button class="send">➤</button>
+  </div>
+</div>
+
+<script>
+const TEAMS = {
+  design:{name:"Design",color:"#22d3ee"},
+  dev:{name:"Dev",color:"#7c6cff"},
+  research:{name:"Research",color:"#f5c451"}
+};
+const AG = {
+  aria:{n:"Aria",rl:"Art Director",team:"design",leader:true,model:["Claude Opus","m-claude"],st:"work",ctx:42,
+        skills:[["Vision","chip"],["Brand","chip"]],x:300,y:150,av:"A",grad:"linear-gradient(135deg,#f5c451,#fb7185)"},
+  vec:{n:"Vec",rl:"Ilustrador",team:"design",model:["Claude Sonnet","m-claude"],st:"idle",ctx:28,
+       skills:[["Figma MCP","chip"]],x:268,y:300,av:"V",grad:"linear-gradient(135deg,#22d3ee,#7c6cff)"},
+  pix:{n:"Pix",rl:"UI Designer",team:"design",model:["GPT-5.5","m-gpt"],st:"work",ctx:61,
+       skills:[["Caveman","chip"]],x:486,y:312,av:"P",grad:"linear-gradient(135deg,#4ade80,#22d3ee)"},
+  mood:{n:"Mood",rl:"Trend Researcher",team:"design",model:["Gemini","m-gemini"],st:"done",ctx:35,
+        skills:[["Web","chip"]],x:572,y:150,av:"M",grad:"linear-gradient(135deg,#93c5fd,#7c6cff)"},
+  atlas:{n:"Atlas",rl:"Tech Lead",team:"dev",leader:true,model:["Claude Opus","m-claude"],st:"work",ctx:55,
+         skills:[["Plan","chip"],["A2A","chip"]],x:900,y:165,av:"A",grad:"linear-gradient(135deg,#7c6cff,#22d3ee)"},
+  forge:{n:"Forge",rl:"Backend Dev",team:"dev",model:["DeepSeek V4","m-deepseek"],st:"work",ctx:70,
+         skills:[["atomic ✓","chip proof"],["pytest","chip"]],x:850,y:322,av:"F",grad:"linear-gradient(135deg,#b3a8ff,#7c6cff)"},
+  lint:{n:"Lint",rl:"Code Reviewer",team:"dev",model:["Claude Haiku","m-claude"],st:"idle",ctx:22,
+        skills:[["Caveman","chip"],["atomic ✓","chip proof"]],x:1086,y:330,av:"L",grad:"linear-gradient(135deg,#e8a17e,#f5c451)"},
+  test:{n:"Test",rl:"QA",team:"dev",model:["Claude Sonnet","m-claude"],st:"err",ctx:18,
+        skills:[["pytest","chip"]],x:1156,y:175,av:"T",grad:"linear-gradient(135deg,#fb7185,#f59e0b)"},
+  sage:{n:"Sage",rl:"Lead Researcher",team:"research",leader:true,model:["GPT-5.5","m-gpt"],st:"idle",ctx:48,
+        skills:[["Plan","chip"]],x:320,y:558,av:"S",grad:"linear-gradient(135deg,#f5c451,#fb7185)"},
+  scout:{n:"Scout",rl:"Scout",team:"research",model:["Gemini Flash","m-gemini"],st:"idle",ctx:30,
+         skills:[["Web","chip"],["RKT","chip"]],x:300,y:688,av:"Sc",grad:"linear-gradient(135deg,#93c5fd,#22d3ee)"},
+  cite:{n:"Cite",rl:"Fact-checker",team:"research",model:["Claude","m-claude"],st:"work",ctx:40,
+        skills:[["atomic ✓","chip proof"]],x:510,y:688,av:"Ci",grad:"linear-gradient(135deg,#7ef0c0,#34d399)"}
+};
+const EDGES = [
+  ["aria","vec"],["aria","pix"],["aria","mood"],
+  ["atlas","forge"],["atlas","test"],["atlas","lint"],["forge","lint","active"],
+  ["sage","scout"],["sage","cite"],
+  ["mood","sage","cross"]
+];
+const ST = {work:["st-work","trabalhando"],idle:["st-idle","ocioso"],done:["st-done","concluído"],err:["st-err","erro"]};
+
+const world = document.getElementById('world');
+function nodeCenter(a){return [a.x+81, a.y+ (a._h||58)];}
+
+// render nodes
+for(const id in AG){
+  const a=AG[id];
+  const el=document.createElement('div');
+  el.className='node'+(a.leader?' leader':'');
+  el.id='n-'+id;
+  el.style.left=a.x+'px';el.style.top=a.y+'px';
+  el.onclick=()=>selectAgent(id);
+  const hi=a.ctx>=60?'hi':'';
+  el.innerHTML=`
+    ${a.leader?'<div class="crown">👑</div>':''}
+    <div class="sdot ${ST[a.st][0]}"></div>
+    <div class="top">
+      <div class="av" style="background:${a.grad}">${a.av}</div>
+      <div><div class="nm">${a.n}</div><div class="rl">${a.rl}</div></div>
+    </div>
+    <div class="row"><span class="badge ${a.model[1]}">${a.model[0]}</span>${a.skills.map(s=>`<span class="${s[1]}">${s[0]}</span>`).join('')}</div>
+    <div class="ctx"><div class="lab"><span>contexto</span><span>${a.ctx}% · 8k</span></div><div class="bar"><i class="${hi}" style="width:${a.ctx}%"></i></div></div>`;
+  world.appendChild(el);
+}
+// measure heights then draw edges
+requestAnimationFrame(()=>{
+  for(const id in AG){AG[id]._h=document.getElementById('n-'+id).offsetHeight/2;}
+  const svg=document.getElementById('edges');
+  EDGES.forEach(e=>{
+    const [c1,c2]=[nodeCenter(AG[e[0]]),nodeCenter(AG[e[1]])];
+    const mx=(c1[0]+c2[0])/2;
+    const p=document.createElementNS('http://www.w3.org/2000/svg','path');
+    p.setAttribute('d',`M${c1[0]},${c1[1]} C${mx},${c1[1]} ${mx},${c2[1]} ${c2[0]},${c2[1]}`);
+    p.setAttribute('class','edge'+(e[2]?(' '+e[2]):''));
+    svg.appendChild(p);
+  });
+});
+
+// ---- selection / inspector ----
+let sel=null;
+function selectAgent(id){
+  if(sel)document.getElementById('n-'+sel)?.classList.remove('sel');
+  sel=id;document.getElementById('n-'+id).classList.add('sel');
+  const a=AG[id];
+  document.getElementById('ih-av').style.background=a.grad;
+  document.getElementById('ih-av').textContent=a.av;
+  document.getElementById('ih-nm').innerHTML=a.n+(a.leader?' <span class="badge" style="background:rgba(245,196,81,.18);color:#f5c451;border:1px solid rgba(245,196,81,.4)">👑 líder</span>':'');
+  document.getElementById('ih-rl').textContent=a.rl+' · Time '+TEAMS[a.team].name;
+  const hi=a.ctx>=60?'hi':'';
+  document.getElementById('ih-body').innerHTML=`
+    <div class="field"><div class="k">Modelo (BYOK)</div><div class="v"><span class="badge ${a.model[1]}">${a.model[0]}</span> <span style="color:var(--faint)">via OpenRouter</span></div></div>
+    <div class="field"><div class="k">System prompt</div><div class="sys">Você é ${a.n}, ${a.rl.toLowerCase()} do time ${TEAMS[a.team].name}. Priorize... <span style="color:var(--faint)">(editar ✎)</span></div></div>
+    <div class="field"><div class="k">Skills & Tools</div><div class="kv">${a.skills.map(s=>`<span class="${s[1]}">${s[0]}</span>`).join('')}<span class="chip">＋ add</span></div></div>
+    <div class="field ctxbig"><div class="k">Contexto em tempo real</div>
+      <div class="lab"><span>janela</span><span>${(a.ctx*80).toLocaleString()} / 8.000 tokens</span></div>
+      <div class="bar"><i class="${hi}" style="width:${a.ctx}%"></i></div>
+      <div style="margin-top:10px">
+        <div class="memrow"><div><b>core: persona</b><br><small>pinado · 1.2k tok</small></div><span class="pin">📌</span></div>
+        <div class="memrow"><div><b>fato: paleta = quente</b><br><small>Graphiti · válido agora</small></div><span class="pin">📌</span></div>
+        <div class="memrow"><div><b>histórico (compactado)</b><br><small>−63% · Morph-compact</small></div><span style="color:var(--faint)">↺</span></div>
+      </div>
+    </div>
+    <div class="field"><div class="k">Status</div><div class="v"><span class="dot ${ST[a.st][0]}" style="display:inline-block;margin-right:6px"></span>${ST[a.st][1]} · recibo atomic ✓</div></div>`;
+  document.getElementById('inspect').classList.add('open');
+  // retarget chat to this agent
+  setTarget(id);
+}
+function closeInsp(){document.getElementById('inspect').classList.remove('open');if(sel){document.getElementById('n-'+sel)?.classList.remove('sel');sel=null;}}
+
+// ---- chat target ----
+function buildMenu(){
+  const m=document.getElementById('t-menu');
+  let h=`<div class="opt" onclick="setTarget('system')"><span class="who-av" style="background:#5b6178">🜂</span> Sistema (ADE) <small>orquestrador</small></div>`;
+  for(const t in TEAMS){
+    h+=`<div class="grp">Time ${TEAMS[t].name}</div>`;
+    for(const id in AG){ if(AG[id].team!==t)continue; const a=AG[id];
+      h+=`<div class="opt" onclick="setTarget('${id}')"><span class="who-av" style="background:${a.grad}">${a.av}</span> ${a.n} <small>${a.leader?'👑 líder':a.rl}</small></div>`;
+    }
+  }
+  m.innerHTML=h;
+}
+buildMenu();
+function toggleMenu(){document.getElementById('t-menu').classList.toggle('show');}
+function setTarget(id){
+  const av=document.getElementById('t-av'),nm=document.getElementById('t-name'),sub=document.getElementById('t-sub');
+  if(id==='system'){av.style.background='#5b6178';av.textContent='🜂';nm.textContent='Sistema (ADE)';sub.textContent='orquestrador · vê todos os times';}
+  else{const a=AG[id];av.style.background=a.grad;av.textContent=a.av;
+    nm.textContent=a.n+(a.leader?' · líder '+TEAMS[a.team].name:'');
+    sub.textContent=(a.leader?'líder do time '+TEAMS[a.team].name:'agente · Time '+TEAMS[a.team].name)+' · '+a.model[0];}
+  document.getElementById('inp').placeholder='Mensagem para '+nm.textContent+'…';
+  document.getElementById('t-menu').classList.remove('show');
+}
+
+// ---- draggable chat ----
+(function(){const chat=document.getElementById('chat'),grip=document.getElementById('grip');let dx,dy,drag=false;
+  grip.addEventListener('mousedown',e=>{drag=true;const r=chat.getBoundingClientRect();dx=e.clientX-r.left;dy=e.clientY-r.top;chat.style.transform='none';grip.style.cursor='grabbing';});
+  window.addEventListener('mousemove',e=>{if(!drag)return;chat.style.left=(e.clientX-dx)+'px';chat.style.top=(e.clientY-dy)+'px';chat.style.bottom='auto';});
+  window.addEventListener('mouseup',()=>{drag=false;grip.style.cursor='grab';});
+})();
+document.addEventListener('click',e=>{if(!e.target.closest('.target'))document.getElementById('t-menu').classList.remove('show');});
+</script>
+</body>
+</html>
