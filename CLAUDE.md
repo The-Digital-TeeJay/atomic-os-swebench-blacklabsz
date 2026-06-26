@@ -6,6 +6,17 @@ Estamos construindo uma **A.D.E — Agent Development Environment**: um ambiente
 > **Tese estratégica da ADE:** o mercado de orquestração de agentes está lotado. Nosso diferencial NÃO é orquestrar — é o **substrato provado** (o `atomic`). Posicionamento: *"a ADE onde a saída de cada agente nasce provada"*. Reusar estado-da-arte (UI, gateway, LangGraph, memória, observabilidade); só o substrato é moat. Marketplace deve ser **proof-gated** ("só propaga o que nasce provado").
 
 **Deep research completo (temos/falta/organização em 8 camadas + roadmap):** ver [`ADE-DEEP-RESEARCH.md`](./ADE-DEEP-RESEARCH.md).
+**Stack técnico de construção (6 frentes pesquisadas: stack por camada + modelo de dados + processos + armadilhas de licença + ordem de build):** ver [`ADE-STACK.md`](./ADE-STACK.md).
+
+### Stack default decidido (jun/2026, OSS-first, multi-tenant)
+- **Topologia:** monorepo Turborepo — `apps/web` (Next.js) + `apps/api` (**Hono**) + `services/agent-worker` (Python FastAPI); ponte durável = **Temporal**.
+- **L7 UI:** React Flow (canvas) · assistant-ui (chat) · Sigma.js (grafo memória) · Yjs (multiplayer) · AG-UI/SSE. ⚠️ tldraw = armadilha de licença.
+- **L4 Orquestração:** LangGraph (peças MIT + servidor próprio — `langgraph-api` é ELv2) + Temporal (durável).
+- **L2 Memória:** Letta + Graphiti (grafo temporal) sobre pgvector→Qdrant.
+- **L1 Gateway:** LiteLLM (pin de versão) ou Portkey (Apache-2.0).
+- **Exec:** E2B/Daytona (microVM/tenant) · xterm.js↔node-pty · Playwright.
+- **Backend:** Supabase Postgres+pgvector (RLS) · Better Auth · Stripe Meters · Langfuse (⚠️ Phoenix=ELv2) · secrets KMS envelope.
+- **Protocolos dia 1:** MCP + A2A + AGENTS.md + SKILL.md + AG-UI. `atomic-edit` (MCP) = tool built-in L0.
 
 ## O que é o `atomic-os` (resumo verificado no código)
 Substrato de edição de código byte-exato **proof-carrying** sob a lei *"only the proven exists"*: nada toca o disco sem prova; auto-modifica só via portão de prova (`expand_self`); aprende acumulando operadores verificados (`weights_admit.py`).
